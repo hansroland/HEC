@@ -34,12 +34,12 @@ extra-doc-files:    CHANGELOG.md
 common warnings
     ghc-options: -Wall
 
-library libint
+library langint
     import:           warnings
     exposed-modules:  LangInt.Syntax
                       , LangInt.Eval
                       , LangInt.Print
-                      , LangInt.PartialEval
+                      -- , LangInt.PartialEval
     -- Modules included in this library but not exported.
     -- other-modules:
 
@@ -52,6 +52,25 @@ library libint
     hs-source-dirs:   src
     default-language: GHC2024
 
+library langvar
+    import:           warnings
+    exposed-modules:  LangVar.Syntax
+--                      , LangVar.Eval
+--                      , LangVar.Print
+--                      , LangVar.PartialEval
+    -- Modules included in this library but not exported.
+    -- other-modules:
+
+    -- LANGUAGE extensions used by modules in this package.
+    -- other-extensions:
+
+    -- Other library packages from which modules are imported.
+    build-depends:    base ^>=4.20.0.0
+                      , mtl
+    hs-source-dirs:   src
+    default-language: GHC2024
+
+
 test-suite HEC-test
     import:           warnings
     default-language: GHC2024
@@ -61,7 +80,7 @@ test-suite HEC-test
         LangIntSpec
         , SpecPrint
         , SpecEval
-        , SpecPartialEval
+        -- , SpecPartialEval
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -77,6 +96,6 @@ test-suite HEC-test
     build-depends:
         base ^>=4.20.0.0
         , hspec
-        , libint
+        , langint
         , silently
         -- Compiler-PL0
