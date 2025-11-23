@@ -1,26 +1,30 @@
--- Abstract Syntax Tree for LangInt
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeAbstractions #-}
+
+-- This module implements the L_Int Syntax.
+-- See python-book fig 1.1 p 5.
 
 module LangInt.Syntax where
 
-data BinOpCode = Add | Sub
-    deriving (Show, Eq)
+class Expr f where
+    type ExprTy f a
+    int :: Int -> ExprTy f Int
+    getInt :: String -> ExprTy f Int
+    usub :: ExprTy f Int -> ExprTy f Int           -- unary subtraction aka negation
+    add :: ExprTy f Int -> ExprTy f Int -> ExprTy f Int
+    sub :: ExprTy f Int -> ExprTy f Int -> ExprTy f Int
+    -- missing: `(exp)`
 
-data UnaryOpCode = USub
-    deriving (Show, Eq)
+class (Expr f) => Stmt f where
+    type StmtTy f a
+    -- stmtexpr :: ExprTy f Int -> StmtTy f Int
+    qprint   :: ExprTy f Int -> StmtTy f ()
+    -- For now, I don't support expressions as statements. The program needs to have an output.
 
-data Expr =
-    Constant Int
-    | BinOp BinOpCode Expr Expr
-    | UnaryOp UnaryOpCode Expr
-    | Call Name [Expr]
-  deriving (Eq, Show)
+-- I don't add the module class, we defer multiple statements until we have assignement.
 
-type Name = String
 
-data Stmt = PrintStmt Expr
-          | ExprStmt  Expr
-  deriving (Eq, Show)
-
-data ModuleInt = ModuleInt [Stmt]
-  deriving (Eq, Show)
 

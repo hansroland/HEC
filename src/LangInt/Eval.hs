@@ -1,36 +1,53 @@
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeAbstractions #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 -- Evaluator (aka Language Interpreter) for the first languagne define in LangInt.
 --
-module LangInt.Eval (evalModule) where
+module LangInt.Eval  where
 
 import LangInt.Syntax
+import Control.Monad.IO.Class
 
-evalModule :: ModuleInt -> IO ()
-evalModule (ModuleInt stmts ) =  mapM_  evalStmt stmts
+instance Expr (IO Int) where
+    type ExprTy (IO Int) Int = IO Int
+    int x = pure x
+    usub e = negate <$> e
+    add = liftA2 (+)
+    sub = liftA2 (-)
+    getInt p = do
+        liftIO $ putStrLn p
+        str <- getLine
+        return $ stringToInt str
 
-evalStmt :: Stmt -> IO (Int)
-evalStmt (PrintStmt e) = do
-    n <- evalExpr e
-    putStrLn $ show n
-    return 0
-evalStmt (ExprStmt e) = evalExpr e
-
--- This is a classic interpreter for a standard ADT Syntax tree.
--- It has nothing to do with tagless final.(*)
--- It runs in the IO Monad and allows us to keep IO out of the
--- type classes used to define our language.
-evalExpr :: Expr -> IO Int
-evalExpr (Constant n) = pure n
-evalExpr (UnaryOp USub expr) = do
-    e <- evalExpr expr
-    pure $ negate e
-evalExpr (BinOp op exp1 exp2) = do
-    e1 <- evalExpr exp1
-    e2 <- evalExpr exp2
-    pure (case op of
-           Add -> e1 + e2
-           Sub -> e1 - e2)
-evalExpr (Call "getInt" []) = putStr "getInt: Enter integer" >> stringToInt <$> getLine
-evalExpr e = error ("Error on evaluating expression: " ++ show e)
+-- How to call the interpreter?
+-- exp1 @(IO Int) or  eval eval (exp1 @(IO Int))
+-- eval :: Repr (IO Int) Int -> Repr (IO Int) Int
+eval :: ExprTy (IO Int) Int -> ExprTy (IO Int) Int
+eval  x = id x
 
 stringToInt :: String -> Int
 stringToInt s = read s
+
+instance Stmt (IO Int) where
+    type StmtTy (IO Int) ()  = IO ()
+    qprint eo = do
+        e <- eo
+        liftIO $ putStrLn (show e)
+
+exp1 :: forall f. Expr f => ExprTy f Int
+exp1 = int @f 1
+
+exp2 :: forall f. (Expr f, Stmt f) => StmtTy f ()
+exp2 = qprint @f (add @f (int @f 1) (int @f 6))
+
+exp3 :: forall f. (Expr f, Stmt f) => StmtTy f ()
+exp3 = qprint @f (add @f (int @f 1) (int @f 22))
+

@@ -1,13 +1,19 @@
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeAbstractions #-}
+
 module LangIntSpec (spec) where
 
 import Test.Hspec
 import SpecPrint (specPrint)
 import SpecEval  (specEval)
-import SpecPartialEval (specPartialEval)
+-- import SpecPartialEval (specPartialEval)
 
 -- Main module for test driver
 spec :: Spec
 spec = do
   specPrint
   specEval
-  specPartialEval
+  -- specPartialEval

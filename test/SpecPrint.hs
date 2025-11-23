@@ -1,3 +1,7 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeAbstractions #-}
+
 module SpecPrint (specPrint) where
 
 import Test.Hspec
@@ -8,38 +12,43 @@ import LangInt.Print
 specPrint :: Spec
 specPrint = do
   describe "Tests for module Print - quickprint" $ do
-    it "qprint evalLit01" $ do
-        qprint testLit01 `shouldBe` "qprint 34\n"
-    it "qprint testNeg01" $ do
-        qprint testNeg01 `shouldBe` "qprint -42\n"
-    it "qprint testNeg02" $ do
-        qprint testNeg02 `shouldBe` "qprint (8 + -(1 + 2))\n"
-    it "qprint testAdd01" $ do
-        qprint testAdd01 `shouldBe` "qprint (8 + 34)\n"
-    it "qprint testAdd02" $ do
-        qprint testAdd02 `shouldBe` "qprint ((1 + 2) + (3 + 4))\n"
-    it "qprint testSub01" $ do
-        qprint testSub01 `shouldBe` "qprint (8 - 34)\n"
-    it "qprint testSub02" $ do
-        qprint testSub02 `shouldBe` "qprint ((1 - 2) - (3 - 4))\n"
+    it "testLit00" $ do
+        (testLit00) @QP  `shouldBe` QP "34"
+    it "testLit01" $ do
+        (testLit01) @QP  `shouldBe` QP "qprint 34"
+    it "testNeg01" $ do
+        (testNeg01) @QP `shouldBe` QP "qprint -42"
+    it "testNeg02" $ do
+        (testNeg02) @QP `shouldBe` QP "qprint (8 + -(1 + 2))"
+    it "testAdd01" $ do
+        (testAdd01) @QP `shouldBe` QP "qprint (8 + 34)"
+    it "testAdd02" $ do
+        (testAdd02) @QP `shouldBe` QP "qprint ((1 + 2) + (3 + 4))"
+    it "testSub01" $ do
+        (testSub01) @QP `shouldBe` QP "qprint (8 - 34)"
+    it "testSub02" $ do
+        (testSub02) @QP `shouldBe` QP "qprint ((1 - 2) - (3 - 4))"
 
-testLit01 :: ModuleInt
-testLit01 = ModuleInt [PrintStmt (Constant 34)]
+testLit00 :: forall f. (Expr f) => ExprTy f Int
+testLit00 = (int @f 34)
 
-testNeg01 :: ModuleInt
-testNeg01 = ModuleInt [PrintStmt (UnaryOp USub (Constant 42))]
+testLit01 :: forall f. (Expr f, Stmt f) => StmtTy f ()
+testLit01 = qprint @f (int @f 34)
 
-testNeg02 :: ModuleInt
-testNeg02 = ModuleInt [PrintStmt (BinOp Add (Constant 8) (UnaryOp USub ((BinOp Add (Constant 1) (Constant 2)))))]
+testNeg01 :: forall f. (Expr f, Stmt f) => StmtTy f ()
+testNeg01 = qprint @f (usub @f (int @f  42))
 
-testAdd01 :: ModuleInt
-testAdd01 = ModuleInt [PrintStmt (BinOp Add (Constant 8) (Constant 34))]
+testNeg02 :: forall f. (Expr f, Stmt f) => StmtTy f ()
+testNeg02 = qprint @f (add @f (int @f 8) (usub  @f ((add  @f (int @f 1) (int @f 2)))))
 
-testAdd02 :: ModuleInt
-testAdd02 = ModuleInt [PrintStmt (BinOp Add (BinOp Add (Constant 1) (Constant 2)) (BinOp Add (Constant 3) (Constant 4)))]
+testAdd01 :: forall f. (Expr f, Stmt f) => StmtTy f ()
+testAdd01 = qprint @f (add @f (int @f 8) (int @f 34))
 
-testSub01 :: ModuleInt
-testSub01 = ModuleInt [PrintStmt (BinOp Sub (Constant 8) (Constant 34))]
+testAdd02 :: forall f. (Expr f, Stmt f) => StmtTy f ()
+testAdd02 = qprint @f (add @f (add  @f (int @f 1) (int @f 2)) (add  @f(int @f 3) (int @f 4)))
 
-testSub02 :: ModuleInt
-testSub02 = ModuleInt [PrintStmt (BinOp Sub (BinOp Sub (Constant 1) (Constant 2)) (BinOp Sub (Constant 3) (Constant 4)))]
+testSub01 :: forall f. (Expr f, Stmt f) => StmtTy f ()
+testSub01 = qprint @f (sub @f (int @f 8) (int @f  34))
+
+testSub02 :: forall f. (Expr f, Stmt f) => StmtTy f ()
+testSub02 = qprint @f (sub @f (sub  @f (int @f  1) (int @f  2)) (sub @f (int @f 3) (int @f 4)))

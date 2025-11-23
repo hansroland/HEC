@@ -1,46 +1,32 @@
--- Print - Module with Print interpreters
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeAbstractions #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
+
+-- This is the pretty printer for the LangInt syntax
+
 module LangInt.Print where
 
 import LangInt.Syntax
 
--- The quick print should print th expression in the concrete syntax
--- The input is supposed to be processed by the Language Parser
+newtype QP  = QP String
+    deriving (Show, Eq)
+unQP :: QP  -> String
+unQP (QP x) = x
 
--- Define a quick printer. It produces an easy and quick string of a sentence.
+instance Expr QP where
+    type ExprTy QP Int = QP
+    int n = QP $ show n
+    getInt p1 = QP (concat ["(getInt ",  "\"", p1, "\")"])
+          -- unary subtraction aka negation
+    usub e = QP $ concat ["-", unQP e]
+    add e1 e2 = QP ( concat["(", unQP e1, " + ", unQP e2, ")" ] )
+    sub e1 e2 = QP ( concat["(", unQP e1, " - ", unQP e2, ")" ] )
 
-qprint :: ModuleInt -> String
-qprint (ModuleInt stmts) = concat $ qprintStmt <$> stmts
+instance Stmt QP where
+    type StmtTy QP () = QP
+    type StmtTy QP Int = QP
+    qprint e = QP $ concat ["qprint ", unQP e]
 
-qprintStmt :: Stmt -> String
-qprintStmt (PrintStmt e) = "qprint " ++ qprintExpr e ++ "\n"
-qprintStmt (ExprStmt e) = qprintExpr e ++ "\n"
-
-qprintExpr :: Expr -> String
-qprintExpr (Constant n)
-          | n >= 0    = show n
-          | otherwise = concat ["(", show n, ")"]
-qprintExpr (BinOp Add e1 e2) = concat [ "(", qprintExpr e1, " + ", qprintExpr e2, ")" ]
-qprintExpr (BinOp Sub e1 e2) = concat [ "(", qprintExpr e1, " - ", qprintExpr e2, ")" ]
-qprintExpr (UnaryOp USub e)  = concat ["-", qprintExpr e]
-qprintExpr (Call name args)  = concat ["Call ", name, prtargs]
-   where prtargs = concat $ qprintExpr <$> args
-
-
-
-{-}
-
--- Define a debug printer. It shwos functions and values
-newtype StrDebug = StrDebug {undebug :: String}
-    deriving (Show, Semigroup, Monoid)
-
-instance Syn1 StrDebug where
-    lit n = StrDebug $ concat [ "(lit ", show n, ")"]
-    neg e = StrDebug $ concat ["neg (", undebug e , ")"]
-    add e1 e2 = StrDebug $ concat ["(add ", undebug e1, " ", undebug e2, ")"]
-    sub e1 e2 = StrDebug $ concat ["(sub ", undebug e1, " ", undebug e2, ")"]
-    getint s = StrDebug $ concat ["getint(", s, ") "]
-    qprt e = StrDebug $ concat [ "qprt ", undebug e ]
-strDebug :: StrDebug -> StrDebug
-strDebug = id
-
--}
