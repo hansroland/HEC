@@ -1,0 +1,81 @@
+cabal-version:      3.0
+-- The name of the package.
+name:               HCE
+
+-- The package version.
+-- See the Haskell package versioning policy (PVP) for standards
+-- guiding when and how versions should be incremented.
+-- https://pvp.haskell.org
+-- PVP summary:     +-+------- breaking API changes
+--                  | | +----- non-breaking API additions
+--                  | | | +--- code changes with no API change
+version:            0.1.0.0
+
+-- A short (one-line) description of the package.
+synopsis:           - Haskell Compilation Essentials
+
+-- A longer description of the package.
+description: Implement parts of: 'J.Siek Essentials of Compilaton' in Haskell.
+
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             Roland Senn
+maintainer:         rsx@bluewin.ch
+-- copyright:
+category:           Language
+build-type:         Simple
+
+-- Extra doc files to be distributed with the package, such as a CHANGELOG or a README.
+extra-doc-files:    CHANGELOG.md
+
+-- Extra source files to be distributed with the package, such as examples, or a tutorial module.
+-- extra-source-files:
+
+common warnings
+    ghc-options: -Wall
+
+library langsrc
+    import:           warnings
+    exposed-modules:  LangSrc.Syntax
+                      , LangSrc.PartialEval
+                      , LangSrc.Eval
+                      , LangSrc.Print
+    -- Modules included in this library but not exported.
+    -- other-modules:
+
+    -- LANGUAGE extensions used by modules in this package.
+    -- other-extensions:
+
+    -- Other library packages from which modules are imported.
+    build-depends:    base ^>=4.20.0.0
+                      , mtl
+    hs-source-dirs:   src
+    default-language: GHC2024
+
+test-suite HEC-test
+    import:           warnings
+    default-language: GHC2024
+
+    -- Modules included in this executable, other than Main.
+    other-modules:
+        LangSrc.LangSrcSpec
+        , LangSrc.SpecPrint
+        , LangSrc.SpecEval
+        , LangSrc.SpecPartialEval
+
+    -- LANGUAGE extensions used by modules in this package.
+    -- other-extensions:
+
+    -- The interface type and version of the test suite.
+    type:             exitcode-stdio-1.0
+    -- Directories containing source files.
+    hs-source-dirs:   test
+    -- The entrypoint to the test suite.
+    main-is:          Spec.hs
+
+    -- Test dependencies.
+    build-depends:
+        base ^>=4.20.0.0
+        , hspec
+        , langsrc
+        , silently
