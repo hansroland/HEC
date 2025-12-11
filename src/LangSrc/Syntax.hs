@@ -9,17 +9,17 @@ data UnaryOp = USub
     deriving (Show, Eq)
 
 data Expr =
-    ExprInt Int
-    | ExprBinOp BinOp Expr Expr
-    | ExprUOp UnaryOp Expr
-    | ExprCall Name [Expr]
+    ExprInt !Int
+    | ExprBinOp !BinOp !Expr !Expr
+    | ExprUOp !UnaryOp !Expr
+    | ExprCall !Name ![Expr]
   deriving (Eq, Show)
 
 type Name = String
 
-data Stmt = StmtPrint Expr
-          | StmtExpr  Expr
+data Stmt = StmtPrint !Expr
+          | StmtExpr  !Expr
   deriving (Eq, Show)
 
-data Progr = Progr [Stmt]
+data Progr = Progr ![Stmt]
   deriving (Eq, Show)
