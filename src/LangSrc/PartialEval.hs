@@ -1,4 +1,4 @@
--- A Partial Evaluator
+-- A Partial Evaluators for the LangVar
 -- The compiler eagerly computes the parts of the program that do not
 --    depend on any inputs, a process known as partial evaluation
 --    (Jones, Gomard, and Sestoft 1993).
@@ -21,12 +21,14 @@ optimizeProg = optUSubProgr . optConstProgr
 optimizeExpr :: Expr -> Expr
 optimizeExpr = optUSubExpr . optConstExpr
 
+-- Optimize Constants eg: Add 5 5 -> 10
 optConstProgr :: Progr -> Progr
 optConstProgr (Progr body) = Progr (optConstStmt <$> body)
 
 optConstStmt :: Stmt -> Stmt
-optConstStmt (StmtPrint expr) = StmtPrint $ optConstExpr expr
-optConstStmt (StmtExpr expr)  = StmtExpr $ optConstExpr expr
+optConstStmt (StmtPrint expr)      = StmtPrint $ optConstExpr expr
+optConstStmt (StmtExpr expr)       = StmtExpr  $ optConstExpr expr
+optConstStmt (StmtAssign var expr) = StmtAssign var $ optConstExpr expr
 
 optConstExpr :: Expr -> Expr
 optConstExpr (ExprBinOp Add lhs rhs) = optConstAdd (optConstExpr lhs) (optConstExpr rhs)
@@ -42,7 +44,6 @@ optConstSub :: Expr -> Expr -> Expr
 optConstSub (ExprInt n1) (ExprInt n2) = ExprInt (n1 - n2)
 optConstSub e1 e2 = ExprBinOp Sub e1 e2
 
-
 -- Optimizing the Unary Sub operation (aka negation)
 --   Remove double negations
 --   Replace: ExprUOp USub (ExprInt n) => (ExprInt -n)
@@ -50,8 +51,9 @@ optUSubProgr :: Progr -> Progr
 optUSubProgr (Progr body) = Progr (optUSubStmt <$> body)
 
 optUSubStmt :: Stmt -> Stmt
-optUSubStmt (StmtPrint expr) = StmtPrint $ optUSubExpr expr
-optUSubStmt (StmtExpr expr)  = StmtExpr $ optUSubExpr expr
+optUSubStmt (StmtPrint expr)      = StmtPrint $ optUSubExpr expr
+optUSubStmt (StmtExpr expr)       = StmtExpr $ optUSubExpr expr
+optUSubStmt (StmtAssign var expr) = StmtAssign var $ optUSubExpr expr
 
 optUSubExpr :: Expr -> Expr
 optUSubExpr (ExprUOp USub (ExprInt n)) = ExprInt (-n)

@@ -2,17 +2,18 @@ module LangSrc.SpecEval (specEval) where
 
 import Test.Hspec
 import LangSrc.Syntax
-import LangSrc.Eval(evalStmt)
+import LangSrc.Eval(evalProgr)
 
 -- To redirect stdin see:
 -- https://stackoverflow.com/questions/76683594/in-haskell-how-can-i-interact-with-stdin-of-an-io
 
 import System.IO.Silently
 
+
 -- Run the test in the IO Monad
 evaltest :: Stmt -> IO String
 evaltest e = do
-    output <- capture_ $ evalStmt e
+    output <- capture_ $ evalProgr $ Progr [e]
     pure output
 
 specEval :: Spec
